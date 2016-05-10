@@ -1,10 +1,11 @@
 /*
 
 a=MoveView().front;
-a.add(Button, 50@50)
+a.addFlowLayout;
+2.do{a.add(Button, 50@50)}
 
 */
-MoveView : View{
+MoveView : UserView{
 
 	*new{arg p, b;
 		^super.new(p, b).init
@@ -30,20 +31,33 @@ MoveView : View{
 		var yfirst = y - v.bounds.origin.y;
 		v.focus;
 		self.mouseMoveAction_({ arg self, xx, yy;
-			v.moveTo(xx - xfirst, yy - yfirst);
+			if(this.children.removing(v).any{|x|
+				x.bounds.intersects(
+					v.bounds.moveTo(xx-xfirst, yy-yfirst)
+				)}.not
+			)
+			{v.moveTo(xx - xfirst, yy - yfirst)};
 		})
 	}
 	resizeAction{ arg self, x, y, v;
-	var xfirst = x;
-	var wfirst = v.bounds.width ;
-	var yfirst = y;
-	var hfirst = v.bounds.height;
-	v.focus;
-	self.mouseMoveAction_({ arg self, xx, yy;
-		v.resizeTo(
-				wfirst + (xx - xfirst),
-				hfirst + (yy - yfirst)				
+		var xfirst = x;
+		var wfirst = v.bounds.width ;
+		var yfirst = y;
+		var hfirst = v.bounds.height;
+		var resizeAction={ arg obj, x, y;
+			obj.resizeTo(
+				wfirst + (x - xfirst),hfirst + (y - yfirst)
 			)
-	})
+		};
+		v.focus;
+		self.mouseMoveAction_({ arg self, xx, yy;
+			if(this.children.removing(v).any{|x|
+				x.bounds.intersects(
+					resizeAction.(v.bounds, xx, yy)
+				)}.not
+			)
+			{resizeAction.(v, xx, yy)}
+		})
 	}
 }
+
