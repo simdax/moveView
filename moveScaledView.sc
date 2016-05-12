@@ -4,8 +4,8 @@ MoveScaledView : ScaledViewPistes{
 		^super.new(p, b).initMSV
 	}
 	// interface
-	add{ arg v, b;
-		v.new(this, b).acceptsMouse_(false) 
+	add{ arg v, b ... args;
+		v.new(this, b, *args).acceptsMouse_(false) 
 	}
 	//pr
 	initMSV{
@@ -14,18 +14,20 @@ MoveScaledView : ScaledViewPistes{
 			// si on touche la vue
 			var v=self.children.detect{|vue| vue.bounds.contains(x@y)};
 			if(v.notNil){
-				// Si click gauche et mod
-				if(but==0)
+				// Si click gauche et mod enclenchée
+				if((but==0) and: (mod!=0))
 				{
 					mod.isCtrl.if {this.moveAction(self, x, y, v)};
 					mod.isShift.if {this.resizeAction(self, x, y, v)}
 				}
 				// sinon on passe à la vue
-				{
+				{ 
+					v.focus;
 					v.mouseDownAction.value(v, x, y, mod, but, nbCl)
 				}
 			}
 		})
+		.mouseUpAction_{ this.mouseMoveAction_{}}
 	}
 	moveAction{ arg self, x, y, v;
 		var xfirst = x - v.bounds.origin.x;
@@ -36,7 +38,7 @@ MoveScaledView : ScaledViewPistes{
 		})
 	}
 	resizeAction{ arg self, x, y, v;
-		// elle est un peu modifié pour bouger que le x;
+		// elle est un peu modifiée pour bouger que le x;
 		var xfirst = x;
 		var wfirst = v.bounds.width ;
 		// var yfirst = y;
@@ -45,13 +47,19 @@ MoveScaledView : ScaledViewPistes{
 		self.mouseMoveAction_({ arg self, xx, yy;
 			v.bounds_(v.bounds.width_(
 				wfirst + (xx - xfirst)
-			).postln)
+			))
 		})
 	}
 }
 
+/*
 
-(
 a=MoveScaledView(nil, 300@300).front;
-a.add(PbindGUI, 50@50)
-)
+a.add(PbindView, 50@50);
+a.add(PbindView, Rect(10,30,50,80));
+
+a=MoveScaledView(nil, 300@300).front;
+a.add(Button, 50@50);
+a.add(Button, Rect(10,30,50,80));
+
+*/
