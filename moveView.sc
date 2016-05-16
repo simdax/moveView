@@ -23,7 +23,6 @@ MoveView : UserView{
 			self.children.do { |x|
 				x.acceptsMouse_(false)
 				.addAction({ arg s, xx, yy, m, b;
-					"alooooors ?".postln;
 					if(m!=0){self.mouseDownAction.value(s, xx, yy, m, b)};
 				}, \mouseDownAction)
 			};
