@@ -1,30 +1,51 @@
 /*
 
-a=MoveView().front;
+a=MoveView(nil, 350@150).front;
 a.addFlowLayout;
-2.do{a.add(Button, 50@50)}
+2.do{Button(a).mouseDownAction_{}};
+c=MultiSliderView(a, 150@150).value_(Array.rand(20,0.0,1));
+
+SkipJack({c.hasFocus.postln}, 0.5);
+
+SkipJack.stopAll 
 
 */
 MoveView : UserView{
 
+	var f; // internal pointer
 	*new{arg p, b;
 		^super.new(p, b).init
-	}
-	// interface
-	add{ arg v, b;
-		v.new(this, b).acceptsMouse_(false) 
 	}
 	//pr
 	init{
 		this
+		.mouseEnterAction_{ arg self, x, y, mod, but;
+			self.children.do { |x|
+				x.acceptsMouse_(false)
+				.addAction({ arg s, xx, yy, m, b;
+					"alooooors ?".postln;
+					if(m!=0){self.mouseDownAction.value(s, xx, yy, m, b)};
+				}, \mouseDownAction)
+			};
+		}
 		.mouseDownAction_({ arg self, x, y, mod, but, nbCl;
 			var v=self.children.detect{|vue| vue.bounds.contains(x@y)};
+			v.postln;
 			if(v.notNil)
 			{
-				mod.isCtrl.if {this.moveAction(self, x, y, v)};
-				mod.isShift.if {this.resizeAction(self, x, y, v)}
-			}
+				v.focus; v.bounds.postln;
+				mod.isCtrl.if {self.moveAction(self, x, y, v)};
+				mod.isShift.if {self.resizeAction(self, x, y, v)}
+				{
+					f.switch(
+						nil, {v.acceptsMouse_(true); f=v},
+						v, {},
+						{f.acceptsMouse_(false); f=v.acceptsMouse_(true)}
+					);
+				}
+			};
 		})
+		.mouseUpAction_{ arg self;	self.mouseMoveAction_{} }
 	}
 	moveAction{ arg self, x, y, v;
 		var xfirst = x - v.bounds.origin.x;
